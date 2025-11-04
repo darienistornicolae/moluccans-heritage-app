@@ -1,3 +1,3 @@
-# moluccans_heritage_app
+# Moluccans Heritage App
 
 A new Flutter project.
