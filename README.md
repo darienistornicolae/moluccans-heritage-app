@@ -1,3 +1,3 @@
 # Moluccans Heritage App
 
-A new Flutter project.
+This repository represents the Moluccans Heritage App. The purpose of it is to increase awaraness towards the heritage.
