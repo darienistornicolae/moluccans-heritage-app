@@ -4,9 +4,9 @@ import 'navigation_item.dart';
 class NavigationConfig {
   static const List<NavigationItem> mobileItems = [
     NavigationItem(
-      icon: Icons.newspaper,
-      selectedIcon: Icons.newspaper,
-      label: 'News',
+      icon: Icons.location_on,
+      selectedIcon: Icons.location_on,
+      label: 'Places',
       index: 0,
     ),
     NavigationItem(
@@ -31,9 +31,9 @@ class NavigationConfig {
       index: 0,
     ),
     NavigationItem(
-      icon: Icons.newspaper_outlined,
-      selectedIcon: Icons.newspaper,
-      label: 'News',
+      icon: Icons.location_on_outlined,
+      selectedIcon: Icons.location_on,
+      label: 'Places',
       index: 1,
     ),
     NavigationItem(

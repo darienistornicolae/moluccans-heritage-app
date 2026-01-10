@@ -3,10 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-import 'news_view.dart';
+import 'places_view.dart';
 import 'map_view.dart';
 import 'gaming_view.dart';
-import '../widgets/ios_tab_bar.dart';
 import '../widgets/web_navigation_sidebar.dart';
 import '../widgets/android_tab_bar.dart';
 import '../models/navigation_config.dart';
@@ -25,7 +24,8 @@ class _MainViewState extends State<MainView> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    if (!kIsWeb && !Platform.isIOS) {
+      // Only needed for Android
       _tabController = TabController(length: 3, vsync: this);
       _tabController.addListener(() {
         if (_tabController.indexIsChanging || _tabController.index != _tabController.previousIndex) {
@@ -37,7 +37,7 @@ class _MainViewState extends State<MainView> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
-    if (!kIsWeb) {
+    if (!kIsWeb && !Platform.isIOS) {
       _tabController.dispose();
     }
     super.dispose();
@@ -45,53 +45,45 @@ class _MainViewState extends State<MainView> with SingleTickerProviderStateMixin
 
   Widget _buildMobileView() {
     if (Platform.isIOS) {
-      return CupertinoPageScaffold(
-        child: Column(
-          children: [
-            Expanded(
-              child: IndexedStack(
-                index: _selectedIndex,
-                children: const [
-                  NewsView(),
-                  MapView(),
-                  GamingView(),
-                ],
-              ),
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                color: CupertinoColors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: CupertinoColors.separator,
-                    width: 0.5,
-                  ),
-                ),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: NavigationConfig.mobileItems.map((item) {
-                    return IosTabBarButton(
-                      icon: item.icon,
-                      label: item.label,
-                      isSelected: _selectedIndex == item.index,
-                      onTap: () => setState(() => _selectedIndex = item.index),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ],
+      return CupertinoTabScaffold(
+        tabBar: CupertinoTabBar(
+          activeColor: Colors.green,
+          inactiveColor: CupertinoColors.inactiveGray,
+          backgroundColor: CupertinoColors.white,
+          items: NavigationConfig.mobileItems.map((item) {
+            return BottomNavigationBarItem(
+              icon: Icon(item.icon),
+              label: item.label,
+            );
+          }).toList(),
         ),
+        tabBuilder: (context, index) {
+          switch (index) {
+            case 0:
+              return CupertinoTabView(
+                builder: (context) => const PlacesView(),
+              );
+            case 1:
+              return CupertinoTabView(
+                builder: (context) => const MapView(),
+              );
+            case 2:
+              return CupertinoTabView(
+                builder: (context) => const GamingView(),
+              );
+            default:
+              return CupertinoTabView(
+                builder: (context) => const PlacesView(),
+              );
+          }
+        },
       );
     } else {
       // Android
       return AndroidTabBar(
         controller: _tabController,
         children: const [
-          NewsView(),
+          PlacesView(),
           MapView(),
           GamingView(),
         ],
@@ -101,6 +93,10 @@ class _MainViewState extends State<MainView> with SingleTickerProviderStateMixin
 
   Widget _buildWebView() {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Kamp Wyldemerk'),
+        centerTitle: true,
+      ),
       body: Row(
         children: [
           WebNavigationSidebar(
@@ -119,19 +115,19 @@ class _MainViewState extends State<MainView> with SingleTickerProviderStateMixin
   Widget _getSelectedView() {
     switch (_selectedIndex) {
       case 0:
-        // Home - for now we are showing NewsView, we'll create the HomeView when we'll have the design for it
-        return const NewsView();
+        // Home - for now we are showing PlacesView, we'll create the HomeView when we'll have the design for it
+        return const PlacesView();
       case 1:
-        return const NewsView();
+        return const PlacesView();
       case 2:
         return const MapView();
       case 3:
         return const GamingView();
       case 4:
-        // Settings - for now we are showing NewsView, we'll create the SettingsView when we'll have the design for it
-        return const NewsView();
+        // Settings - for now we are showing PlacesView, we'll create the SettingsView when we'll have the design for it
+        return const PlacesView();
       default:
-        return const NewsView();
+        return const PlacesView();
     }
   }
 
