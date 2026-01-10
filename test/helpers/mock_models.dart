@@ -22,19 +22,16 @@ class MockModels {
   }
 
   static AudioModel createMockAudio({
-    String? id,
-    int? numericId,
     String? url,
     String? title,
-    String? description,
+    String? place,
+    String? file,
   }) {
     return AudioModel(
-      id: id ?? '/api/audios/1',
-      type: 'Audio',
-      numericId: numericId ?? 1,
-      url: url ?? '/uploads/audios/test.mp3',
+      url: url ?? 'https://example.com/audio',
       title: title ?? 'Test Audio',
-      description: description ?? 'Test audio description',
+      place: place ?? 'https://example.com/place',
+      file: file ?? '/uploads/audios/test.mp3',
     );
   }
 
@@ -101,7 +98,14 @@ class MockModels {
           'description': 'Test image description',
         }
       ],
-      'audios': [],
+      'audios': [
+        {
+          'url': 'https://example.com/audio',
+          'title': 'Test Audio',
+          'place': 'https://example.com/place',
+          'file': '/uploads/audios/test.mp3',
+        }
+      ],
     };
   }
 
