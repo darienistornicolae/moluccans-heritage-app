@@ -1,50 +1,42 @@
 /// Model representing an audio file from the API
 class AudioModel {
-  final String id;
-  final String type;
-  final int numericId;
   final String url;
   final String title;
-  final String description;
+  final String place;
+  final String file;
 
   AudioModel({
-    required this.id,
-    required this.type,
-    required this.numericId,
     required this.url,
     required this.title,
-    required this.description,
+    required this.place,
+    required this.file,
   });
 
   /// Creates an AudioModel from JSON
   factory AudioModel.fromJson(Map<String, dynamic> json) {
     return AudioModel(
-      id: json['@id'] as String,
-      type: json['@type'] as String,
-      numericId: json['id'] as int,
       url: json['url'] as String,
       title: json['title'] as String,
-      description: json['description'] as String,
+      place: json['place'] as String,
+      file: json['file'] as String,
     );
   }
 
   /// Converts AudioModel to JSON
   Map<String, dynamic> toJson() {
     return {
-      '@id': id,
-      '@type': type,
-      'id': numericId,
       'url': url,
       'title': title,
-      'description': description,
+      'place': place,
+      'file': file,
     };
   }
 
   /// Gets the full URL for the audio file
   String getFullUrl(String baseUrl) {
-    if (url.startsWith('http')) {
-      return url;
+    if (file.startsWith('http')) {
+      return file;
     }
-    return '$baseUrl$url';
+    return '$baseUrl$file';
   }
 }
