@@ -13,6 +13,10 @@ class AndroidTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Kamp Wyldemerk'),
+        centerTitle: true,
+      ),
       body: TabBarView(
         controller: controller,
         children: children,
@@ -29,10 +33,10 @@ class AndroidTabBar extends StatelessWidget {
           tabs: [
             Tab(
               icon: Icon(
-                Icons.newspaper,
+                Icons.location_on,
                 color: controller.index == 0 ? Colors.white : Colors.grey,
               ),
-              text: 'News',
+              text: 'Places',
             ),
             Tab(
               icon: Icon(
