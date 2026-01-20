@@ -2,15 +2,15 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
-import '../models/marker_model.dart';
+import '../models/place_model.dart';
 import '../models/route_model.dart';
 
 class MapManager {
   MapboxMap? _mapboxMap;
   PointAnnotationManager? _pointManager;
-  PolylineAnnotationManager? _polylineManager;
   PolylineAnnotationManager? _routePolylineManager;
   List<PointAnnotation> _pointAnnotations = [];
+  List<PlaceModel> _places = [];
 
   void setMapboxMap(MapboxMap map) {
     _mapboxMap = map;
@@ -34,26 +34,32 @@ class MapManager {
     ));
   }
 
-  Future<void> addMarkers(
-    List<MarkerModel> markers,
-    Function(MarkerModel) onMarkerClick,
+  /// Add markers from backend PlaceModel data
+  Future<void> addPlaceMarkers(
+    List<PlaceModel> places,
+    Function(PlaceModel) onPlaceClick,
   ) async {
     if (_mapboxMap == null) return;
 
     try {
+      _places = places;
       _pointManager = await _mapboxMap!.annotations.createPointAnnotationManager();
-      _polylineManager = await _mapboxMap!.annotations.createPolylineAnnotationManager();
 
-      final redMarkerBytes = await _createCustomMarkerBitmap(Colors.red);
-      final blueMarkerBytes = await _createCustomMarkerBitmap(Colors.blue);
+      // Create custom marker
+      final markerBytes = await _createCustomMarkerBitmap(Colors.red);
+      await _addMarkerImage(markerBytes);
 
-      await _addMarkerImages(redMarkerBytes, blueMarkerBytes);
-
-      for (int i = 0; i < markers.length; i++) {
+      // Add markers for each place from backend
+      for (var place in places) {
         final annotation = await _pointManager!.create(
           PointAnnotationOptions(
-            geometry: Point(coordinates: markers[i].position),
-            iconImage: i == 0 ? "red-marker" : "blue-marker",
+            geometry: Point(
+              coordinates: Position(
+                place.longitudeValue,
+                place.latitudeValue,
+              ),
+            ),
+            iconImage: "custom-marker",
             iconSize: 1.0,
             iconAnchor: IconAnchor.BOTTOM,
           ),
@@ -61,28 +67,21 @@ class MapManager {
         _pointAnnotations.add(annotation);
       }
 
+      // Add click listener
       _pointManager!.addOnPointAnnotationClickListener(
         _PointAnnotationClickListener(
           onAnnotationClick: (annotation) {
             final index = _pointAnnotations.indexOf(annotation);
-            if (index != -1) {
-              onMarkerClick(markers[index]);
+            if (index != -1 && index < _places.length) {
+              onPlaceClick(_places[index]);
             }
           },
         ),
       );
 
-      if (markers.length >= 2) {
-        await _polylineManager!.create(PolylineAnnotationOptions(
-          geometry: LineString(
-            coordinates: markers.map((m) => m.position).toList(),
-          ),
-          lineColor: Colors.green.value,
-          lineWidth: 4.0,
-        ));
-      }
+      print('✅ Added ${places.length} place markers to map');
     } catch (e) {
-      print("Error adding markers: $e");
+      print("❌ Error adding markers: $e");
     }
   }
 
@@ -106,7 +105,7 @@ class MapManager {
 
       _fitCameraToRoute(coordinates);
     } catch (e) {
-      print("Error drawing route: $e");
+      print("❌ Error drawing route: $e");
     }
   }
 
@@ -184,15 +183,17 @@ class MapManager {
     return byteData!.buffer.asUint8List();
   }
 
-  Future<void> _addMarkerImages(
-    Uint8List redMarkerBytes,
-    Uint8List blueMarkerBytes,
-  ) async {
-    final redMarker = MbxImage(width: 50, height: 50, data: redMarkerBytes);
-    final blueMarker = MbxImage(width: 50, height: 50, data: blueMarkerBytes);
-
-    await _mapboxMap!.style.addStyleImage("red-marker", 1.0, redMarker, false, [], [], null);
-    await _mapboxMap!.style.addStyleImage("blue-marker", 1.0, blueMarker, false, [], [], null);
+  Future<void> _addMarkerImage(Uint8List markerBytes) async {
+    final marker = MbxImage(width: 50, height: 50, data: markerBytes);
+    await _mapboxMap!.style.addStyleImage(
+      "custom-marker",
+      1.0,
+      marker,
+      false,
+      [],
+      [],
+      null,
+    );
   }
 }
 
@@ -205,4 +206,4 @@ class _PointAnnotationClickListener extends OnPointAnnotationClickListener {
   void onPointAnnotationClick(PointAnnotation annotation) {
     onAnnotationClick(annotation);
   }
-}
+} // new map manager
