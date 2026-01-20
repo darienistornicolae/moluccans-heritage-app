@@ -3,8 +3,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import '../models/place_model.dart';
 import '../viewmodels/places_viewmodel.dart';
 import '../widgets/place_card.dart';
+import 'place_details_view.dart';
 
 /// PlacesView displays places as cards
 /// Follows MVVM pattern - UI observes ViewModel state
@@ -41,6 +43,24 @@ class _PlacesViewState extends State<PlacesView> {
         _scrollController.position.maxScrollExtent * 0.9) {
       _viewModel.loadMore();
     }
+  }
+
+  void _openPlaceDetails(PlaceModel place, String baseUrl) {
+    final isCupertino = !kIsWeb && Platform.isIOS;
+    final route = isCupertino
+        ? CupertinoPageRoute<void>(
+            builder: (context) => PlaceDetailsView(
+              place: place,
+              baseUrl: baseUrl,
+            ),
+          )
+        : MaterialPageRoute<void>(
+            builder: (context) => PlaceDetailsView(
+              place: place,
+              baseUrl: baseUrl,
+            ),
+          );
+    Navigator.of(context).push(route);
   }
 
   @override
@@ -197,7 +217,7 @@ class _PlacesViewState extends State<PlacesView> {
                       place: place,
                       baseUrl: viewModel.baseUrl,
                       onTap: () {
-                        debugPrint('Tapped on ${place.title}');
+                        _openPlaceDetails(place, viewModel.baseUrl);
                       },
                     );
                   },
@@ -243,7 +263,7 @@ class _PlacesViewState extends State<PlacesView> {
               place: place,
               baseUrl: viewModel.baseUrl,
               onTap: () {
-                debugPrint('Tapped on ${place.title}');
+                _openPlaceDetails(place, viewModel.baseUrl);
               },
             ),
           );

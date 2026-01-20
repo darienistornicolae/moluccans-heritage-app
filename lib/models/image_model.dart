@@ -43,6 +43,9 @@ class ImageModel {
   /// Gets the full URL for the image
   String getFullUrl(String baseUrl) {
     if (url.startsWith('http')) {
+      if (url.startsWith('http://')) {
+        return url.replaceFirst('http://', 'https://');
+      }
       return url;
     }
     return '$baseUrl$url';

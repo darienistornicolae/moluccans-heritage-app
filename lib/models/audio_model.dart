@@ -35,6 +35,9 @@ class AudioModel {
   /// Gets the full URL for the audio file
   String getFullUrl(String baseUrl) {
     if (file.startsWith('http')) {
+      if (file.startsWith('http://')) {
+        return file.replaceFirst('http://', 'https://');
+      }
       return file;
     }
     return '$baseUrl$file';

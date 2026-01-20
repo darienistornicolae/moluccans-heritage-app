@@ -21,11 +21,16 @@ class MainApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
           useMaterial3: true,
         ),
+        darkTheme: ThemeData.light(),
+        themeMode: ThemeMode.light,
         home: const MainView(),
       );
     } else if (Platform.isIOS) {
       return const CupertinoApp(
         title: 'Moluccans Heritage App',
+        theme: CupertinoThemeData(
+          brightness: Brightness.light,
+        ),
         home: MainView(),
       );
     } else {
@@ -35,6 +40,8 @@ class MainApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
+        darkTheme: ThemeData.light(),
+        themeMode: ThemeMode.light,
         home: const MainView(),
       );
     }

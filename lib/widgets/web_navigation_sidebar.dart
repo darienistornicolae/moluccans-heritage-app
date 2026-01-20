@@ -13,9 +13,10 @@ class WebNavigationSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const sidebarColor = Color(0xFF1B5E20);
     return Container(
       width: 200,
-      color: Colors.grey[300],
+      color: sidebarColor,
       child: Column(
         children: NavigationConfig.webItems.map((item) {
           return WebNavItem(
@@ -52,19 +53,21 @@ class WebNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const selectedColor = Color(0xFF2E7D32);
+    const unselectedColor = Colors.white70;
     return InkWell(
       onTap: onTap,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected ? selectedColor : Colors.transparent,
         ),
         child: Row(
           children: [
             Icon(
               isSelected ? selectedIcon : icon,
-              color: isSelected ? Colors.black : Colors.grey[700],
+              color: isSelected ? Colors.white : unselectedColor,
               size: 24,
             ),
             const SizedBox(width: 12),
@@ -72,7 +75,7 @@ class WebNavItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 16,
-                color: isSelected ? Colors.black : Colors.grey[700],
+                color: isSelected ? Colors.white : unselectedColor,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),

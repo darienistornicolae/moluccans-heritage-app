@@ -93,10 +93,6 @@ class _MainViewState extends State<MainView> with SingleTickerProviderStateMixin
 
   Widget _buildWebView() {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kamp Wyldemerk'),
-        centerTitle: true,
-      ),
       body: Row(
         children: [
           WebNavigationSidebar(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../models/place_model.dart';
 
@@ -76,6 +77,9 @@ class PlaceCard extends StatelessWidget {
       child: Image.network(
         imageUrl,
         fit: BoxFit.cover,
+        webHtmlElementStrategy: kIsWeb
+            ? WebHtmlElementStrategy.prefer
+            : WebHtmlElementStrategy.never,
         errorBuilder: (context, error, stackTrace) {
           return _buildPlaceholder();
         },
