@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
-// FIXED: Use relative imports instead of package imports
 import '../models/location_service.dart';
 import '../models/mapbox_service.dart';
 import '../models/marker_model.dart';
@@ -26,17 +25,18 @@ class _MapViewState extends State<MapView> {
   List<MarkerModel> _markers = [];
   RouteModel? _currentRouteData;
   MarkerModel? _currentDestination;
-  bool _isLoading = true;
+  
+  bool _showMap = false;  // NEW: Controls whether to show map
+  bool _isLoading = false;
   String _errorMessage = '';
 
-  @override
-  void initState() {
-    super.initState();
-    print('🚀 [MapView] initState called');
-    _initialize();
-  }
+  // This will be called when user taps the button
+  Future<void> _loadMap() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
 
-  Future<void> _initialize() async {
     try {
       print('🔄 Starting location initialization...');
       final position = await _locationService.getCurrentLocation();
@@ -47,6 +47,7 @@ class _MapViewState extends State<MapView> {
           _currentPosition = position;
           _markers = _createMockMarkers(position);
           _isLoading = false;
+          _showMap = true;  // Show the map
         });
       } else {
         print('❌ Location is null');
@@ -386,7 +387,75 @@ class _MapViewState extends State<MapView> {
 
   @override
   Widget build(BuildContext context) {
-    print('🔨 [MapView] Building, isLoading: $_isLoading');
+    // Show the welcome screen with button if map hasn't been loaded yet
+    if (!_showMap) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.map,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Map',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Explore locations on the map',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              const SizedBox(height: 40),
+              
+              // LOAD MAP BUTTON
+              FilledButton.icon(
+                onPressed: _isLoading ? null : _loadMap,
+                icon: _isLoading 
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.map_outlined),
+                label: Text(_isLoading ? 'Loading...' : 'Load Map'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              
+              // Show error if any
+              if (_errorMessage.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    _errorMessage,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show the actual map once loaded
     return Scaffold(
       body: Stack(
         children: [
@@ -398,94 +467,16 @@ class _MapViewState extends State<MapView> {
             ),
             onMapCreated: _onMapCreated,
           ),
-          if (_isLoading)
-            Container(
-              color: Theme.of(context).colorScheme.surface,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.map,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Map',
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Loading your location...',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                    const SizedBox(height: 24),
-                    CircularProgressIndicator(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          if (_errorMessage.isNotEmpty && !_isLoading)
-            Container(
-              color: Theme.of(context).colorScheme.surface,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Error',
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        _errorMessage,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _isLoading = true;
-                          _errorMessage = '';
-                        });
-                        _initialize();
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
         ],
       ),
-      floatingActionButton: !_isLoading && _errorMessage.isEmpty && _currentPosition != null
+      floatingActionButton: _currentPosition != null
           ? FloatingActionButton(
               onPressed: () {
-                if (_currentPosition != null) {
-                  final position = Position(
-                    _currentPosition!.longitude,
-                    _currentPosition!.latitude,
-                  );
-                  _mapManager.moveCamera(position);
-                }
+                final position = Position(
+                  _currentPosition!.longitude,
+                  _currentPosition!.latitude,
+                );
+                _mapManager.moveCamera(position);
               },
               child: const Icon(Icons.my_location),
             )
